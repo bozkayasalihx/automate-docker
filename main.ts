@@ -80,5 +80,5 @@ export class Execute {
 
 
 
-const execute = new Execute("./test2");
+const execute = new Execute("/home/ubuntu/test2");
 execute.build()
