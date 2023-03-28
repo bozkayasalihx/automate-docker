@@ -1,4 +1,4 @@
-import {execSync, exec} from 'child_process';
+import {execSync, exec, spawn} from 'child_process';
 import path from 'path';
 
 export class Execute {
@@ -14,7 +14,7 @@ export class Execute {
 
 
     private check(): boolean {
-        let valid: boolean = false;
+        let valid: boolean = true;
         exec("docker images", (err, sdtout) => {
             if (err) {
                 console.log("got an error! try again later!\n", err); 
@@ -23,7 +23,7 @@ export class Execute {
             if (sdtout.includes("android")) {
                 valid = true;
             }
-            valid  =false
+            valid =true
         })
 
         return valid;
@@ -53,8 +53,15 @@ export class Execute {
         }
 
         try {
-            const buff = execSync(this.keepRunningDocker);
-            console.log(buff.toString() + "\n")
+            // const buff = execSync(this.keepRunningDocker);
+            // console.log(buff.toString() + "\n")
+            const docker = spawn("docker", ["run", "--name", "android", "-v", "`pwd`:/project", "-it", "mingc/android-build-box", "bash"])
+            docker.on("message", (msg) =>  {
+                console.log(msg.toString() + "\n");
+            })
+            docker.on("error", code => {
+                console.log("got an error with this error code", code);
+            })
             const b = execSync(this.extract)
             console.log(b.toString());
         }catch(err) {
