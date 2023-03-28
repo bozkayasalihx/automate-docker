@@ -3,10 +3,9 @@ import path from 'path';
 
 export class Execute {
     private dir:string 
-    private Command = "docker run --rm -v `pwd`:/project mingc/android-build-box bash -c 'cd /project; ./gradlew build'"
-    // private outDir = "/project/app/build/outputs/apk/release"
+    private Command = "docker run --rm -v `pwd`:/project mingc/android-build-box bash -c 'cd /project; ./gradlew assambleRelease'"
     private keepRunningDocker = "docker run --name android  -v `pwd`:/project -it mingc/android-build-box bash"
-    private extract = "docker cp android:/project/app/build/outputs/apk/release/app-release-unsigned.apk /home/ubuntu"
+    private extract = "docker cp android:/project/app/build/outputs/apk/release/*.apk /home/ubuntu"
 
     constructor(dir: string) {
         this.dir= dir;
@@ -33,6 +32,10 @@ export class Execute {
 
     private absolutePath(): string {
         return path.resolve(this.dir);
+    }
+    
+    private upload() {
+
     }
 
 
@@ -77,8 +80,4 @@ export class Execute {
 }
 
 
-
-
-
-const execute = new Execute("/home/ubuntu/test2");
-execute.build()
+export default new Execute("/home/ubuntu/test2");
