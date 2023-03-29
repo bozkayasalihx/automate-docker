@@ -60,7 +60,7 @@ app.get("/bundle/:bundle/:s3address", async(req, res) => {
             const updatedXml = builder.buildObject(result);
 
             // Write the updated XML back to the file
-            fs.writeFile('path/to/your/xml/file.xml', updatedXml, (err) => {
+            fs.writeFile('home/ubuntu/file.xml', updatedXml, (err) => {
               if (err) {
                 console.error(err);
                 return;
