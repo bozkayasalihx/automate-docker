@@ -5,7 +5,7 @@ import { S3Uploader } from "./uploader";
 import "dotenv/config";
 import fs from 'fs';
 //@ts-ignore
-import  Parser from './xmlParser';
+import xml2js from  "xml2js";
 
 const REGION = process.env.REGION
 const ACCESSKEY = process.env.ACCESSKEY; 
@@ -21,8 +21,8 @@ app.get("/bundle/:bundle/:s3address", async(req, res) => {
     const { bundle, s3address} = req.params
     if(!bundle || !s3address) return res.sendStatus(400);
     res.sendStatus(200);
-    execute.build()
-    const uploader = new S3Uploader(REGION as string, ACCESSKEY as string, SECRETKEY as string, s3address)
+    // execute.build()
+    // const uploader = new S3Uploader(REGION as string, ACCESSKEY as string, SECRETKEY as string, s3address)
 
     // let mostrecent: number = 0;
     // let thefile: string = "";
@@ -40,22 +40,40 @@ app.get("/bundle/:bundle/:s3address", async(req, res) => {
     //     break;
     // }
     try {
-        const buf = fs.readFileSync("/home/ubuntu/test2/app/src/main/AndroidManifest.xml")
-        //@ts-ignore
-        const parser = new Parser();
-        const data = parser(buf).parse()
-        console.log('data', data);
+        fs.readFile("/home/ubuntu/test2/app/src/main/AndroidManifest.xml", (err, data) => {
+          if (err) {
+            console.error(err);
+            return;
+          }
+
+          xml2js.parseString(data, (err, result) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
+
+            // Update the package field
+            result.manifest.$.package = 'com.bozkayasalih';
+
+            // Convert the updated result back to XML
+            const builder = new xml2js.Builder();
+            const updatedXml = builder.buildObject(result);
+
+            // Write the updated XML back to the file
+            fs.writeFile('path/to/your/xml/file.xml', updatedXml, (err) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+
+              console.log('Package field updated successfully!');
+            });
+          });
+    });
         
     }catch(err) {
         console.log(`got an error ${err}`);
     }
-    
-
-
-
-
-
-
 })
 
 
