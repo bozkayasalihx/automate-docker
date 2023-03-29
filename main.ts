@@ -4,7 +4,7 @@ import path from 'path';
 
 export class Execute {
     private dir:string 
-    private Command = "docker run --rm -v `pwd`:/project mingc/android-build-box bash -c 'cd /project; ./gradlew assambleRelease'"
+    private Command = "docker run --rm -v `pwd`:/project mingc/android-build-box bash -c 'cd /project; ./gradlew assembleRelease'"
     private extract = "docker cp android:/project/app/build/outputs/apk/release/*.apk /home/ubuntu"
 
     constructor(dir: string) {
