@@ -4,8 +4,8 @@ import glob from "glob";
 import { S3Uploader } from "./uploader";
 import "dotenv/config";
 import fs from "fs";
-//@ts-ignore
 import xml2js from "xml2js";
+import fetch from 'node-fetch';
 
 const REGION = process.env.REGION;
 const ACCESSKEY = process.env.ACCESSKEY;
@@ -18,6 +18,8 @@ app.use(express.json());
 app.get("/bundle/:bundle/:s3address", async (req, res) => {
     const { bundle, s3address } = req.params;
     if (!bundle || !s3address) return res.sendStatus(400);
+    const isDownloaded = await downloadFile()
+    if(!isDownloaded) return res.sendStatus(400);
     try {
 
         const buff = fs.readFileSync("/home/ubuntu/test2/app/src/main/AndroidManifest.xml");
@@ -124,3 +126,18 @@ function template(packageBundle: string) {
         return false;
     }
 }
+
+
+async function downloadFile() {
+    try {
+        const response = await fetch("https://gearbox.playablefactory.com/files/y7hD0F6gp8hitADJxOTBGG7_T_test/default.js");
+        const data = await response.json()
+        fs.writeFileSync("/home/ubuntu/test2/app/src/main/assets/www/test.js", data as string);
+        return true;
+    }catch(err) {
+        console.log("got and error while downloading ", err);
+        return false;
+        
+    }
+}
+
