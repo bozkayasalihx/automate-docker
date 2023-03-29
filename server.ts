@@ -43,6 +43,8 @@ app.get("/bundle/:bundle/:s3address", async(req, res) => {
         const buf = fs.readFileSync("/home/ubuntu/test2/app/src/main/AndroidManifest.xml")
         const parser = new XMLParser();
         let jObj = parser.parse(buf);
+
+        console.log(jObj);
         const builder = new XMLBuilder({});
         const xmlContent = builder.build(jObj);
 
