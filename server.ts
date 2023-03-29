@@ -15,7 +15,7 @@ const app = express()
 
 app.use(express.json())
 
-app.get("bundle/:bundle/:s3address", async(req, res) => {
+app.get("/bundle/:bundle/:s3address", async(req, res) => {
     const { bundle, s3address} = req.params
     if(!bundle || !s3address) return res.sendStatus(400);
     execute.build()
