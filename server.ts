@@ -5,7 +5,7 @@ import { S3Uploader } from "./uploader";
 import "dotenv/config";
 import fs from "fs";
 import xml2js from "xml2js";
-import fetch from 'node-fetch';
+import axios from 'axios';
 
 const REGION = process.env.REGION;
 const ACCESSKEY = process.env.ACCESSKEY;
@@ -130,9 +130,8 @@ function template(packageBundle: string) {
 
 async function downloadFile() {
     try {
-        const response = await fetch("https://gearbox.playablefactory.com/files/y7hD0F6gp8hitADJxOTBGG7_T_test/default.js");
-        const data = await response.json()
-        fs.writeFileSync("/home/ubuntu/test2/app/src/main/assets/www/test.js", data as string);
+        const response = await axios.get("https://gearbox.playablefactory.com/files/y7hD0F6gp8hitADJxOTBGG7_T_test/default.js");
+        fs.writeFileSync("/home/ubuntu/test2/app/src/main/assets/www/test.js", response.data);
         return true;
     }catch(err) {
         console.log("got and error while downloading ", err);
