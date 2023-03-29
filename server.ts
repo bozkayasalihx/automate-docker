@@ -53,6 +53,7 @@ app.get("/bundle/:bundle/:s3address", async(req, res) => {
             }
 
             // Update the package field
+            console.log(result.manifest.$)
             result.manifest.$.package = 'com.bozkayasalih';
 
             // Convert the updated result back to XML
@@ -60,7 +61,7 @@ app.get("/bundle/:bundle/:s3address", async(req, res) => {
             const updatedXml = builder.buildObject(result);
 
             // Write the updated XML back to the file
-            fs.writeFile('home/ubuntu/file.xml', updatedXml, (err) => {
+            fs.writeFile("/home/ubuntu/test2/app/src/main/AndroidManifest.xml", updatedXml, (err) => {
               if (err) {
                 console.error(err);
                 return;
