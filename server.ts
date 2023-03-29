@@ -4,6 +4,7 @@ import glob from 'glob';
 import { S3Uploader } from "./uploader";
 import "dotenv/config";
 import fs from 'fs';
+import {XMLParser, XMLBuilder} from 'fast-xml-parser';
 
 
 const REGION = process.env.REGION
@@ -19,8 +20,9 @@ app.use(express.json())
 app.get("/bundle/:bundle/:s3address", async(req, res) => {
     const { bundle, s3address} = req.params
     if(!bundle || !s3address) return res.sendStatus(400);
+    res.sendStatus(200);
     execute.build()
-    // const uploader = new S3Uploader(REGION, ACCESSKEY, SECRETKEY, s3address)
+    const uploader = new S3Uploader(REGION as string, ACCESSKEY as string, SECRETKEY as string, s3address)
 
     let mostrecent: number = 0;
     let thefile: string = "";
@@ -37,8 +39,21 @@ app.get("/bundle/:bundle/:s3address", async(req, res) => {
         }
         break;
     }
+    try {
+        const buf = fs.readFileSync("/home/ubuntu/test2/app/src/main/AndroidManifest.xml")
+        const parser = new XMLParser();
+        let jObj = parser.parse(buf);
+        const builder = new XMLBuilder({});
+        const xmlContent = builder.build(jObj);
 
-    return res.sendStatus(200);
+        console.log(xmlContent);
+    }catch(err) {
+        console.log(`got an error ${err}`);
+    }
+    
+
+
+
 
 
 
