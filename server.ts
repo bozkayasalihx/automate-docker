@@ -36,6 +36,10 @@ app.get("bundle/:bundle/:s3address", async(req, res) => {
         break;
     }
 
+    return res.sendStatus(200);
+
+
+
 })
 
 
