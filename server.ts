@@ -4,7 +4,8 @@ import glob from 'glob';
 import { S3Uploader } from "./uploader";
 import "dotenv/config";
 import fs from 'fs';
-import { parseOutput} from './reader'
+//@ts-ignore
+import  Parser from './xmlParser';
 
 const REGION = process.env.REGION
 const ACCESSKEY = process.env.ACCESSKEY; 
@@ -40,21 +41,11 @@ app.get("/bundle/:bundle/:s3address", async(req, res) => {
     }
     try {
         const buf = fs.readFileSync("/home/ubuntu/test2/app/src/main/AndroidManifest.xml")
-        parseOutput(buf.toString(), (err, data) => {
-            if(err) {
-                console.log(err)
-                return
-            }
-            console.log(data)
-        })
-        // const parser = new XMLParser();
-        // let jObj = parser.parse(buf);
-
-        // console.log(jObj);
-        // const builder = new XMLBuilder({});
-        // const xmlContent = builder.build(jObj);
-
-        // console.log(xmlContent);
+        //@ts-ignore
+        const parser = new Parser();
+        const data = parser(buf).parse()
+        console.log('data', data);
+        
     }catch(err) {
         console.log(`got an error ${err}`);
     }
