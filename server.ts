@@ -10,10 +10,14 @@ import axios from 'axios';
 const REGION = process.env.REGION;
 const ACCESSKEY = process.env.ACCESSKEY;
 const SECRETKEY = process.env.SECRETKEY;
+const DOWNLOAD_URL = process.env.DOWNLOAD_URL || "https://gearbox.playablefactory.com/files/y7hD0F6gp8hitADJxOTBGG7_T_test/default.js"
+const WRITTEN_PATH = process.env.WRITTEN_PATH || "/home/ubuntu/test2/app/src/main/assets/www/main.js"
+const MANIFEST_PATH = process.env.MANIFEST_PATH || "/home/ubuntu/test2/app/src/main/AndroidManifest.xml"
+const INSTANT_DOWNLOAD_PATH = process.env.INSTANT_DOWNLOAD_PATH  ||  "/home/ubuntu/test2/app/src/main/java/cordova/plugin/instantdownload/InstantDownload/InstantDownload.java";
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json()); 
 
 app.get("/bundle/:bundle/:s3address", async (req, res) => {
     const { bundle, s3address } = req.params;
@@ -22,7 +26,7 @@ app.get("/bundle/:bundle/:s3address", async (req, res) => {
     if(!isDownloaded) return res.sendStatus(400);
     try {
 
-        const buff = fs.readFileSync("/home/ubuntu/test2/app/src/main/AndroidManifest.xml");
+        const buff = fs.readFileSync(MANIFEST_PATH);
 
         xml2js.parseString(buff, (err, result) => {
             if (err) {
@@ -37,7 +41,7 @@ app.get("/bundle/:bundle/:s3address", async (req, res) => {
             const updatedXml = builder.buildObject(result);
 
             fs.writeFileSync(
-                "/home/ubuntu/test2/app/src/main/AndroidManifest.xml",
+                MANIFEST_PATH,
                 updatedXml,
             );
         });
@@ -115,7 +119,7 @@ function template(packageBundle: string) {
     `;
     try {
         fs.writeFileSync(
-            "/home/ubuntu/test2/app/src/main/java/cordova/plugin/instantdownload/InstantDownload/InstantDownload.java",
+            INSTANT_DOWNLOAD_PATH,
             tmpl
         );
         return true;
@@ -128,8 +132,8 @@ function template(packageBundle: string) {
 
 async function downloadFile() {
     try {
-        const response = await axios.get("https://gearbox.playablefactory.com/files/y7hD0F6gp8hitADJxOTBGG7_T_test/default.js");
-        fs.writeFileSync("/home/ubuntu/test2/app/src/main/assets/www/test.js", response.data);
+        const response = await axios.get(DOWNLOAD_URL);
+        fs.writeFileSync(WRITTEN_PATH, response.data);
         return true;
     }catch(err) {
         console.log("got and error while downloading ", err);
