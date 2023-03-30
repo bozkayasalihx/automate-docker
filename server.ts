@@ -14,6 +14,7 @@ const DOWNLOAD_URL = process.env.DOWNLOAD_URL || "https://gearbox.playablefactor
 const WRITTEN_PATH = process.env.WRITTEN_PATH || "/home/ubuntu/test2/app/src/main/assets/www/main.js"
 const MANIFEST_PATH = process.env.MANIFEST_PATH || "/home/ubuntu/test2/app/src/main/AndroidManifest.xml"
 const INSTANT_DOWNLOAD_PATH = process.env.INSTANT_DOWNLOAD_PATH  ||  "/home/ubuntu/test2/app/src/main/java/cordova/plugin/instantdownload/InstantDownload/InstantDownload.java";
+const PORT = process.env.PORT || 5000
 
 const app = express();
 
@@ -81,8 +82,8 @@ app.get("/bundle/:bundle/:s3address/:apkname", async (req, res) => {
     console.log("sent response to remote server. its all good to go \n");
 });
 
-app.listen(5000, () => {
-    console.log("server is running on port ", 5000);
+app.listen(PORT, () => {
+    console.log("server is running on port ", PORT);
 });
 
 function template(packageBundle: string) {
