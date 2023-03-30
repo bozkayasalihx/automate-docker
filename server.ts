@@ -19,9 +19,9 @@ const app = express();
 
 app.use(express.json()); 
 
-app.get("/bundle/:bundle/:s3address", async (req, res) => {
-    const { bundle, s3address } = req.params;
-    if (!bundle || !s3address) return res.sendStatus(400);
+app.get("/bundle/:bundle/:s3address/:apkname", async (req, res) => {
+    const { bundle, s3address, apkname } = req.params;
+    if (!bundle || !s3address || !apkname) return res.sendStatus(400);
     const isDownloaded = await downloadFile()
     if(!isDownloaded) return res.sendStatus(400);
     try {
@@ -74,7 +74,11 @@ app.get("/bundle/:bundle/:s3address", async (req, res) => {
         break;
     }
 
-    console.log("the file the creator of the universe", thefile);
+    
+    uploader.uploadFile(thefile, apkname);
+    console.log(`${apkname} upload is done \n`)
+    await responseBack("jsofsejfosjf")
+    console.log("sent response to remote server. its all good to go \n");
 });
 
 app.listen(5000, () => {
@@ -142,3 +146,8 @@ async function downloadFile() {
     }
 }
 
+
+async function  responseBack(responseBackUrl: string) {
+    const response = await axios.post(responseBackUrl, { status: "done" })
+    return response 
+}
