@@ -30,10 +30,9 @@ app.get("/bundle/:bundle/:s3address", async (req, res) => {
                 return;
             }
 
-            console.log(result.manifest.$["android:versionName"]);
             result.manifest.$.package = "com.bozkayasalih";
             result.manifest.$["android:versionName"] = "1.0.0";
-            result.manifest.$["android:versionCode"] = "00000";
+            result.manifest.$["android:versionCode"] = "1";
             const builder = new xml2js.Builder();
             const updatedXml = builder.buildObject(result);
 
@@ -42,8 +41,7 @@ app.get("/bundle/:bundle/:s3address", async (req, res) => {
                 updatedXml,
             );
         });
-        const result = template(bundle);
-        console.log(result);
+        template(bundle);
     } catch (err) {
         console.log(`got an error ${err}`);
     }
@@ -108,7 +106,7 @@ function template(packageBundle: string) {
 
         private void downloadApp(CallbackContext callbackContext) {
             Intent postInstallIntent = new Intent(Intent.ACTION_MAIN,
-                                Uri.parse(${packageBundle})).
+                                Uri.parse("${packageBundle}")).
                                 addCategory(Intent.CATEGORY_DEFAULT);
 
             InstantApps.showInstallPrompt(this.cordova.getActivity(), postInstallIntent, 7, null);
