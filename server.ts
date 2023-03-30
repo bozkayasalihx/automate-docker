@@ -75,9 +75,9 @@ app.get("/bundle/:bundle/:s3address/:apkname", async (req, res) => {
     }
 
     
-    uploader.uploadFile(thefile, apkname);
+    // uploader.uploadFile(thefile, apkname);
     console.log(`${apkname} upload is done \n`)
-    await responseBack("jsofsejfosjf")
+    // await responseBack("jsofsejfosjf")
     console.log("sent response to remote server. its all good to go \n");
 });
 
