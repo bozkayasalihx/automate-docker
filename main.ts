@@ -4,9 +4,9 @@ import path from "path";
 export class Execute {
     private dir: string;
     private Command =
-        "docker run --rm -v `pwd`:/project mingc/android-build-box bash -c 'cd /project; ./gradlew assembleRelease'";
+        "docker run --rm -v `pwd`:/project mingc/android-build-box bash -c 'cd /project; ./gradlew bundleRelease'";
     private extract =
-        "docker cp android:/project/app/build/outputs/apk/release/app-release-unsigned.apk /home/ubuntu";
+        "docker cp android:/project/app/build/outputs/bundle/release/app-release.aab /home/ubuntu";
 
     constructor(dir: string) {
         this.dir = dir;
