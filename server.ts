@@ -15,10 +15,12 @@ const WRITTEN_PATH = process.env.WRITTEN_PATH || "/home/ubuntu/test2/app/src/mai
 const MANIFEST_PATH = process.env.MANIFEST_PATH || "/home/ubuntu/test2/app/src/main/AndroidManifest.xml"
 const INSTANT_DOWNLOAD_PATH = process.env.INSTANT_DOWNLOAD_PATH  ||  "/home/ubuntu/test2/app/src/main/java/cordova/plugin/instantdownload/InstantDownload/InstantDownload.java";
 const PORT = process.env.PORT || 5000
+const VERSION_NAME = process.env.VERSION_NAME
+const VERSION_CODE = process.env.VERSION_CODE
 
 const app = express();
 
-app.use(express.json()); 
+app.use(express.json());
 
 app.get("/bundle/:bundle/:s3address/:apkname", async (req, res) => {
     const { bundle, s3address, apkname } = req.params;
@@ -35,9 +37,9 @@ app.get("/bundle/:bundle/:s3address/:apkname", async (req, res) => {
                 return;
             }
 
-            result.manifest.$.package = "com.bozkayasalih";
-            result.manifest.$["android:versionName"] = "1.0.0";
-            result.manifest.$["android:versionCode"] = "1";
+            result.manifest.$.package = bundle
+            result.manifest.$["android:versionName"] = VERSION_NAME;
+            result.manifest.$["android:versionCode"] = VERSION_CODE;
             const builder = new xml2js.Builder();
             const updatedXml = builder.buildObject(result);
 
@@ -62,7 +64,7 @@ app.get("/bundle/:bundle/:s3address/:apkname", async (req, res) => {
     let mostrecent: number = 0;
     let thefile: string = "";
     while (true) {
-        const files = await glob("/home/ubuntu/*.apk");
+        const files = await glob("/home/ubuntu/*.aab");
         if (files.length == 0) continue;
         for (let file of files) {
             console.log(file + "\n");
@@ -75,7 +77,7 @@ app.get("/bundle/:bundle/:s3address/:apkname", async (req, res) => {
         break;
     }
 
-    
+
     // uploader.uploadFile(thefile, apkname);
     console.log(`${apkname} upload is done \n`)
     // await responseBack("jsofsejfosjf")
@@ -143,12 +145,14 @@ async function downloadFile() {
     }catch(err) {
         console.log("got and error while downloading ", err);
         return false;
-        
+
     }
 }
 
 
 async function  responseBack(responseBackUrl: string) {
     const response = await axios.post(responseBackUrl, { status: "done" })
-    return response 
+    return response
 }
+
+
