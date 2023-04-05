@@ -1,4 +1,4 @@
-import express from "express";
+import express, {Request, Response} from "express";
 import execute from "./main";
 import glob from "glob";
 import { S3Uploader } from "./uploader";
@@ -10,23 +10,24 @@ import axios from 'axios';
 const REGION = process.env.REGION;
 const ACCESSKEY = process.env.ACCESSKEY;
 const SECRETKEY = process.env.SECRETKEY;
-const DOWNLOAD_URL = process.env.DOWNLOAD_URL || "https://gearbox.playablefactory.com/files/y7hD0F6gp8hitADJxOTBGG7_T_test/default.js"
+// const DOWNLOAD_URL = process.env.DOWNLOAD_URL || "https://gearbox.playablefactory.com/files/y7hD0F6gp8hitADJxOTBGG7_T_test/default.js"
 const WRITTEN_PATH = process.env.WRITTEN_PATH || "/home/ubuntu/test2/app/src/main/assets/www/main.js"
 const MANIFEST_PATH = process.env.MANIFEST_PATH || "/home/ubuntu/test2/app/src/main/AndroidManifest.xml"
-const INSTANT_DOWNLOAD_PATH = process.env.INSTANT_DOWNLOAD_PATH  ||  "/home/ubuntu/test2/app/src/main/java/cordova/plugin/instantdownload/InstantDownload/InstantDownload.java";
-const PORT = process.env.PORT || 5000
-const VERSION_NAME = process.env.VERSION_NAME
-const VERSION_CODE = process.env.VERSION_CODE
+const INSTANT_DOWNLOAD_PATH = process.env.INSTANT_DOWNLOAD_PATH  ||  "/home/ubuntu/test2/app/src/main/java/cordova/plugin/instantdownload/InstantDownload/InstantDownload.java"; const PORT = process.env.PORT || 5000
+const S3_BUCKET = "storage-domain"
 
 const app = express();
 
 app.use(express.json());
 
-app.get("/bundle/:bundle/:s3address/:apkname", async (req, res) => {
-    const { bundle, s3address, apkname } = req.params;
-    if (!bundle || !s3address || !apkname) return res.sendStatus(400);
-    const isDownloaded = await downloadFile()
-    if(!isDownloaded) return res.sendStatus(400);
+app.post("/bundle", async (req: Request<{bundle: string, version: string, code: string, download_url: string}>, res: Response) => {
+    const { bundle, version, code, download_url } = req.body
+    if (!bundle || !version || !code || !download_url) return res.sendStatus(400);
+    downloadFile(download_url).then((ev) => {
+        console.log(`${ev} done \n`)
+    }).catch((err) => {
+            console.log("got an error " ,err);
+    })
     try {
 
         const buff = fs.readFileSync(MANIFEST_PATH);
@@ -38,8 +39,8 @@ app.get("/bundle/:bundle/:s3address/:apkname", async (req, res) => {
             }
 
             result.manifest.$.package = bundle
-            result.manifest.$["android:versionName"] = VERSION_NAME;
-            result.manifest.$["android:versionCode"] = VERSION_CODE;
+            result.manifest.$["android:versionName"] = version;
+            result.manifest.$["android:versionCode"] =  code;
             const builder = new xml2js.Builder();
             const updatedXml = builder.buildObject(result);
 
@@ -58,7 +59,7 @@ app.get("/bundle/:bundle/:s3address/:apkname", async (req, res) => {
         REGION as string,
         ACCESSKEY as string,
         SECRETKEY as string,
-        s3address
+        S3_BUCKET as string,
     );
 
     let mostrecent: number = 0;
@@ -78,8 +79,7 @@ app.get("/bundle/:bundle/:s3address/:apkname", async (req, res) => {
     }
 
 
-    // uploader.uploadFile(thefile, apkname);
-    console.log(`${apkname} upload is done \n`)
+    uploader.uploadFile(thefile, Date.now() + ".aab");
     // await responseBack("jsofsejfosjf")
     console.log("sent response to remote server. its all good to go \n");
 });
@@ -90,40 +90,39 @@ app.listen(PORT, () => {
 
 function template(packageBundle: string) {
     const tmpl = `
-    package cordova.plugin.instantdownload;
+package cordova.plugin.instantdownload;
 
-    import org.apache.cordova.CordovaPlugin;
-    import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.CallbackContext;
 
-    import org.json.JSONArray;
-    import org.json.JSONException;
-    import org.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-    import com.google.android.gms.instantapps.InstantApps;
-    import android.content.Intent;
-    import android.net.Uri;
+import com.google.android.gms.instantapps.InstantApps;
+import android.content.Intent;
+import android.net.Uri;
 
-    public class InstantDownload extends CordovaPlugin {
+public class InstantDownload extends CordovaPlugin {
 
-        @Override
-        public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+    @Override
+    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
 
-            if (action.equals("downloadApp")) {
-                this.downloadApp( callbackContext );
-                return true;
-            }
-            return false;
+        if (action.equals("downloadApp")) {
+            this.downloadApp( callbackContext );
+            return true;
         }
-
-        private void downloadApp(CallbackContext callbackContext) {
-            Intent postInstallIntent = new Intent(Intent.ACTION_MAIN,
-                                Uri.parse("${packageBundle}")).
-                                addCategory(Intent.CATEGORY_DEFAULT);
-
-            InstantApps.showInstallPrompt(this.cordova.getActivity(), postInstallIntent, 7, null);
-        }
+        return false;
     }
-    `;
+
+    private void downloadApp(CallbackContext callbackContext) {
+        Intent postInstallIntent = new Intent(Intent.ACTION_MAIN,
+                            Uri.parse("${packageBundle}")).
+                            addCategory(Intent.CATEGORY_DEFAULT);
+
+        InstantApps.showInstallPrompt(this.cordova.getActivity(), postInstallIntent, 7, null);
+    }
+}`;
     try {
         fs.writeFileSync(
             INSTANT_DOWNLOAD_PATH,
@@ -137,9 +136,9 @@ function template(packageBundle: string) {
 }
 
 
-async function downloadFile() {
+async function downloadFile(download_url: string) {
     try {
-        const response = await axios.get(DOWNLOAD_URL);
+        const response = await axios.get(download_url);
         fs.writeFileSync(WRITTEN_PATH, response.data);
         return true;
     }catch(err) {

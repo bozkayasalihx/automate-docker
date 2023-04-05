@@ -4,7 +4,7 @@ import path from "path";
 export class Execute {
     private dir: string;
     private Command =
-        "docker run --rm -v `pwd`:/project mingc/android-build-box bash -c 'cd /project; ./gradlew bundleRelease'";
+        "docker run --rm -v `pwd`:/project salihbozkaya1001/android-build bash -c 'cd /project; ./gradlew bundleRelease'";
     private extract =
         "docker cp android:/project/app/build/outputs/bundle/release/app-release.aab /home/ubuntu";
 
@@ -32,7 +32,6 @@ export class Execute {
         return path.resolve(this.dir);
     }
 
-    private upload() {}
 
     public build() {
         if (this.check() == false) {
@@ -59,7 +58,7 @@ export class Execute {
                 "-v",
                 "`pwd`:/project",
                 "-it",
-                "mingc/android-build-box",
+                "salihbozkaya1001/android-build",
                 "bash",
             ]);
             docker.on("message", (msg) => {
