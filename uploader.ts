@@ -28,7 +28,7 @@ export class S3Uploader {
             Bucket: this.bucketName,
             Key: fileName,
             Body: fileData,
-            // ContentType: "application/vnd.android.package-archive",
+            ContentType: "application/vnd.android.package-archive",
         };
 
         this.s3.upload(
