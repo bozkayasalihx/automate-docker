@@ -9,7 +9,7 @@ export class S3Uploader {
         region: string,
         accessKeyId: string,
         secretAccessKey: string,
-        bucketName: string
+        bucketName: string,
     ) {
         AWS.config.update({
             region: region,
@@ -21,7 +21,7 @@ export class S3Uploader {
         this.bucketName = bucketName;
     }
 
-    public uploadFile(filePath: string, fileName: string): void {
+    public uploadFile(filePath: string, fileName: string,  cb: (err?: Error) => void): void {
         const fileData = fs.readFileSync(filePath);
 
         const s3Params: AWS.S3.Types.PutObjectRequest = {
@@ -36,10 +36,12 @@ export class S3Uploader {
             (err: Error, data: AWS.S3.ManagedUpload.SendData) => {
                 if (err) {
                     console.error(err);
+                    cb(err);
                 } else {
                     console.log(
                         `File uploaded successfully. File location: ${data.Location}`
                     );
+                    cb()
                 }
             }
         );

@@ -10,7 +10,6 @@ import axios from 'axios';
 const REGION = process.env.REGION;
 const ACCESSKEY = process.env.ACCESSKEY;
 const SECRETKEY = process.env.SECRETKEY;
-// const DOWNLOAD_URL = process.env.DOWNLOAD_URL || "https://gearbox.playablefactory.com/files/y7hD0F6gp8hitADJxOTBGG7_T_test/default.js"
 const WRITTEN_PATH = process.env.WRITTEN_PATH || "/home/ubuntu/test2/app/src/main/assets/www/main.js"
 const MANIFEST_PATH = process.env.MANIFEST_PATH || "/home/ubuntu/test2/app/src/main/AndroidManifest.xml"
 const INSTANT_DOWNLOAD_PATH = process.env.INSTANT_DOWNLOAD_PATH  ||  "/home/ubuntu/test2/app/src/main/java/cordova/plugin/instantdownload/InstantDownload/InstantDownload.java"; const PORT = process.env.PORT || 5000
@@ -20,10 +19,10 @@ const app = express();
 
 app.use(express.json());
 
-app.post("/bundle", async (req: Request<{bundle: string, version: string, code: string, download_url: string}>, res: Response) => {
-    const { bundle, version, code, download_url } = req.body
-    if (!bundle || !version || !code || !download_url) return res.sendStatus(400);
-    downloadFile(download_url).then((ev) => {
+app.post("/bundle", async (req: Request<{versionCode: string, versionName: string, packageName: string, mainJs: string, _id: string}>, res: Response) => {
+    const { versionCode, versionName, packageName, mainJs, _id } = req.body
+    if (!versionCode || !versionName || !packageName ||  !mainJs ||  !_id) return res.sendStatus(400);
+    downloadFile(mainJs).then((ev) => {
         console.log(`${ev} done \n`)
     }).catch((err) => {
             console.log("got an error " ,err);
@@ -38,9 +37,9 @@ app.post("/bundle", async (req: Request<{bundle: string, version: string, code: 
                 return;
             }
 
-            result.manifest.$.package = bundle
-            result.manifest.$["android:versionName"] = version;
-            result.manifest.$["android:versionCode"] =  code;
+            result.manifest.$.package = packageName;
+            result.manifest.$["android:versionName"] = versionName;
+            result.manifest.$["android:versionCode"] =  versionCode;
             const builder = new xml2js.Builder();
             const updatedXml = builder.buildObject(result);
 
@@ -49,7 +48,7 @@ app.post("/bundle", async (req: Request<{bundle: string, version: string, code: 
                 updatedXml,
             );
         });
-        template(bundle);
+        template(packageName);
     } catch (err) {
         console.log(`got an error ${err}`);
     }
@@ -77,10 +76,23 @@ app.post("/bundle", async (req: Request<{bundle: string, version: string, code: 
         }
         break;
     }
+    
 
+    const s3Url = `https://storage-domain.s3.eu-central-1.amazonaws.com/${Date.now()}.aab`;
 
-    uploader.uploadFile(thefile, Date.now() + ".aab");
-    // await responseBack("jsofsejfosjf")
+    uploader.uploadFile(thefile, Date.now() + ".aab", (err) =>  {
+        if(err) {
+            responseBack({id: _id, url: s3Url, status: "got an error"}).then(() => {
+            }).catch(err => {
+                    console.log("err ->", err);
+            })
+        }else {
+            responseBack({id: _id, url: s3Url, status: "Ok"}).then(() => {
+            }).catch(err => {
+                    console.log("err ->", err);
+            })
+        }
+    });
     console.log("sent response to remote server. its all good to go \n");
 });
 
@@ -149,9 +161,14 @@ async function downloadFile(download_url: string) {
 }
 
 
-async function  responseBack(responseBackUrl: string) {
-    const response = await axios.post(responseBackUrl, { status: "done" })
-    return response
+
+// id, url ,status
+async function  responseBack(obj: { id: string, url: string, status: string}) {
+    try {
+        await axios.post("https://api.playablefactory.com/api/instantGameBuildNotify", obj);
+    }catch(err) {
+        console.log('an error accured try again later!', err);
+    }
 }
 
 
