@@ -56,8 +56,8 @@ app.post("/bundle", async (req: Request<{versionCode: string, versionName: strin
     execute.build();
     const uploader = new S3Uploader(
         REGION as string,
-        ACCESSKEY as string,
         SECRETKEY as string,
+        ACCESSKEY as string,
         S3_BUCKET as string,
     );
 
@@ -77,20 +77,20 @@ app.post("/bundle", async (req: Request<{versionCode: string, versionName: strin
         break;
     }
     
-
-    const s3Url = `https://storage-domain.s3.eu-central-1.amazonaws.com/${Date.now()}.aab`;
+     // const s3Url = `https://storage-domain.s3.eu-central-1.amazonaws.com/${Date.now()}.aab`;
 
     uploader.uploadFile(thefile, Date.now() + ".aab", (err) =>  {
+        console.log("got an error", err);
         if(err) {
-            responseBack({id: _id, url: s3Url, status: "got an error"}).then(() => {
-            }).catch(err => {
-                    console.log("err ->", err);
-            })
+            // responseBack({id: _id, url: s3Url, status: "got an error"}).then(() => {
+            // }).catch(err => {
+            //         console.log("err ->", err);
+            // })
         }else {
-            responseBack({id: _id, url: s3Url, status: "Ok"}).then(() => {
-            }).catch(err => {
-                    console.log("err ->", err);
-            })
+            // responseBack({id: _id, url: s3Url, status: "Ok"}).then(() => {
+            // }).catch(err => {
+            //         console.log("err ->", err);
+            // })
         }
     });
     console.log("sent response to remote server. its all good to go \n");
@@ -168,7 +168,7 @@ async function  responseBack(obj: { id: string, url: string, status: string}) {
         await axios.post("https://api.playablefactory.com/api/instantGameBuildNotify", obj);
     }catch(err) {
         console.log('an error accured try again later!', err);
-    }
+   }
 }
 
 
