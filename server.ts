@@ -67,7 +67,6 @@ app.post("/bundle", async (req: Request<{versionCode: string, versionName: strin
         const files = await glob("/home/ubuntu/*.aab");
         if (files.length == 0) continue;
         for (let file of files) {
-            console.log(file + "\n");
             const lastModified = fs.statSync(file).mtimeMs;
             if (lastModified > mostrecent) {
                 mostrecent = lastModified;
@@ -77,20 +76,22 @@ app.post("/bundle", async (req: Request<{versionCode: string, versionName: strin
         break;
     }
     
-     // const s3Url = `https://storage-domain.s3.eu-central-1.amazonaws.com/${Date.now()}.aab`;
+     const s3Url = `https://storage-domain.s3.eu-central-1.amazonaws.com/${Date.now()}.aab`;
+    //
+    console.log('the file' ,thefile);
 
     uploader.uploadFile(thefile, Date.now() + ".aab", (err) =>  {
         console.log("got an error", err);
         if(err) {
-            // responseBack({id: _id, url: s3Url, status: "got an error"}).then(() => {
-            // }).catch(err => {
-            //         console.log("err ->", err);
-            // })
+            responseBack({id: _id, url: s3Url, status: "got an error"}).then(() => {
+            }).catch(err => {
+                    console.log("err ->", err);
+            })
         }else {
-            // responseBack({id: _id, url: s3Url, status: "Ok"}).then(() => {
-            // }).catch(err => {
-            //         console.log("err ->", err);
-            // })
+            responseBack({id: _id, url: s3Url, status: "Ok"}).then(() => {
+            }).catch(err => {
+                    console.log("err ->", err);
+            })
         }
     });
     console.log("sent response to remote server. its all good to go \n");
