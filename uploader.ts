@@ -24,14 +24,11 @@ export class S3Uploader {
     public uploadFile(filePath: string, fileName: string,  cb: (err?: Error) => void): void {
         const fileData = fs.readFileSync(filePath);
 
-        console.log('filename', filePath)
-        console.log("data", JSON.stringify(fileData))
-
         const s3Params: AWS.S3.Types.PutObjectRequest = {
             Bucket: this.bucketName,
             Key: fileName,
             Body: fileData,
-            ContentType: "application/vnd.android.package-archive",
+            // ContentType: "application/vnd.android.package-archive",
         };
 
         this.s3.upload(
